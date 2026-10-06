@@ -2,44 +2,42 @@ package edu.praktikum.sprint7.clients;
 
 import edu.praktikum.sprint7.models.Order;
 import io.qameta.allure.Step;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 
 public class OrderClient {
+    private static final String BASE_URL = "https://qa-scooter.praktikum-services.ru";
 
-    private static final String API_V1_ORDERS = "/api/v1/orders";
-
-    public OrderClient() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
-    }
-
-    @Step
+    @Step("Создание заказа")
     public Response create(Order order) {
         return given()
                 .contentType(JSON)
-                .and()
                 .body(order)
                 .when()
-                .post(API_V1_ORDERS);
+                .post(BASE_URL + "/api/v1/orders");
     }
 
-    @Step
+    @Step("Получение списка заказов")
     public Response getOrders() {
         return given()
-                .contentType(JSON)
-                .and()
                 .when()
-                .get(API_V1_ORDERS);
+                .get(BASE_URL + "/api/v1/orders");
     }
 
-    @Step
-    public Response acceptOrder(int orderId, int courierId) {
+    @Step("Получение заказа по треку")
+    public Response getOrderByTrack(int track) {
         return given()
-                .queryParam("courierId", courierId)
+                .queryParam("t", track)
                 .when()
-                .put("/api/v1/orders/accept/" + orderId);
+                .get(BASE_URL + "/api/v1/orders/track");
     }
+
+    @Step("Получение заказа без параметра")
+    public Response getOrderByTrackWithoutParam() {
+        return given()
+                .when()
+                .get(BASE_URL + "/api/v1/orders/track");
     }
+}

@@ -9,11 +9,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class LoginCourier {
-
 
     private CourierClient courierClient;
     private Courier testCourier;
@@ -25,33 +23,30 @@ public class LoginCourier {
 
         testCourier = new Courier()
                 .setLogin("user_" + System.currentTimeMillis())
-                .setPassword("password123")
-                .setFirstName("Иван");
+                .setPassword("Qaz123")
+                .setFirstName("Саша");
 
-        courierClient.create(testCourier);
-
-        courierCreds = CourierCreds.credsFromCourier(testCourier);
+        courierClient.create(testCourier).then().statusCode(201);
+        courierCreds = new CourierCreds()
+                .setLogin(testCourier.getLogin())
+                .setPassword(testCourier.getPassword());
+        Response loginResponse = courierClient.login(courierCreds);
+        testCourier.setId(loginResponse.jsonPath().getInt("id"));
     }
+
     @Test
-    @Description
-
-    public void Authorization() {
-
-        Response response = given()
-                .header("Content-Type", "application/json")
-                .body(courierCreds)
-                .when()
-                .post("/api/v1/courier/login");
-
+    @Description("Успешная авторизация курьера")
+    public void authorization() {
+        Response response = courierClient.login(courierCreds);
         response.then()
                 .statusCode(200)
-                .body("id",notNullValue());
-
-
+                .body("id", notNullValue());
     }
+
     @AfterEach
     public void tearDown() {
-        if (testCourier != null) {
-            courierClient.delete(testCourier.getLogin());
+        if (testCourier != null && testCourier.getId() != 0) {
+            courierClient.delete(String.valueOf(testCourier.getId()));
         }
-    }}
+    }
+}

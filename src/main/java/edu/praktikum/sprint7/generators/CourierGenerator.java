@@ -1,15 +1,16 @@
 package edu.praktikum.sprint7.generators;
 
 import edu.praktikum.sprint7.models.Courier;
-
-import static edu.praktikum.sprint7.utils.Utils.randomString;
+import net.datafaker.Faker;
 
 public class CourierGenerator {
 
+    private static final Faker faker = new Faker();
+
     public static Courier randomCourier() {
         return new Courier()
-                .setLogin(randomString())
-                .setPassword(randomString())
-                .setFirstName(randomString());
+                .setLogin(faker.name().username())
+                .setPassword(faker.internet().password())
+                .setFirstName(faker.name().firstName());
     }
 }
