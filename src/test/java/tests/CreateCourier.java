@@ -41,8 +41,9 @@ public class CreateCourier {
         Response loginResp = courierClient.login(new CourierCreds()
                 .setLogin(newCourier.getLogin())
                 .setPassword(newCourier.getPassword()));
-        newCourier.setId(loginResp.jsonPath().getInt("id"));
-        testCourier = newCourier;
+        int newId = loginResp.jsonPath().getInt("id");
+
+        courierClient.delete(String.valueOf(newId));
     }
 
     @Test

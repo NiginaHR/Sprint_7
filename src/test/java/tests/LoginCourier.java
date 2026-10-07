@@ -8,7 +8,7 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class LoginCourier {
@@ -42,7 +42,32 @@ public class LoginCourier {
                 .statusCode(200)
                 .body("id", notNullValue());
     }
+    @Test
+    @Description("Авторизация с неверным паролем")
+    public void loginWithWrongPassword() {
+        CourierCreds wrongCreds = new CourierCreds()
+                .setLogin(testCourier.getLogin())
+                .setPassword("WrongPassword123");
 
+        courierClient.login(wrongCreds)
+                .then()
+                .statusCode(404)  //
+                .body("message", is("Учетная запись не найдена"));
+    }
+
+    @Test
+    @Description("Авторизация несуществующего курьера")
+    public void loginWithNonExistentCourier() {
+        CourierCreds fakeCreds = new CourierCreds()
+                .setLogin("user_" + System.currentTimeMillis())
+                .setPassword("Qaz123");
+
+        courierClient.login(fakeCreds)
+                .then()
+                .statusCode(404)
+                .body("message", is("Учетная запись не найдена"));
+
+    }
     @AfterEach
     public void tearDown() {
         if (testCourier != null && testCourier.getId() != 0) {
